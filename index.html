@@ -865,21 +865,31 @@
                 return;
             }
 
-            playSound('success');
-
-            // Fluxo sequencial
+            // PASSO 1 – Localização
             if (passoAtual === 1) {
+                playSound('success');
                 document.getElementById('inputLoc').value = code;
-                document.getElementById('lblStep1').innerHTML = `1. LOC: <span style="color:var(--cor-secundaria)">${code}</span> <i class="bi bi-check-circle-fill" style="color: var(--cor-principal);"></i>`;
+                document.getElementById('lblStep1').innerHTML =
+                    `1. LOC: <span style="color:var(--cor-secundaria)">${code}</span>
+             <i class="bi bi-check-circle-fill" style="color: var(--cor-principal);"></i>`;
                 mudarPasso(2);
+                return;
+            }
 
-            } else if (passoAtual === 2) {
+            // PASSO 2 – Status
+            if (passoAtual === 2) {
+                playSound('success');
                 document.getElementById('inputStatus').value = code;
-                document.getElementById('lblStep2').innerHTML = `2. STS: <span style="color:var(--cor-secundaria)">${code}</span> <i class="bi bi-check-circle-fill" style="color: var(--cor-principal);"></i>`;
+                document.getElementById('lblStep2').innerHTML =
+                    `2. STS: <span style="color:var(--cor-secundaria)">${code}</span>
+             <i class="bi bi-check-circle-fill" style="color: var(--cor-principal);"></i>`;
                 mudarPasso(3);
+                return;
+            }
 
-            } else {
-                // Regra 1: Bipagem salva direto na lista (Persistência imediata simulada)
+            // PASSO 3 – Caixas
+            // Aqui o som é controlado SOMENTE dentro de adicionarCaixa()
+            if (passoAtual === 3) {
                 adicionarCaixa(code);
             }
         }
@@ -1091,4 +1101,3 @@
 </body>
 
 </html>
-
