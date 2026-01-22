@@ -546,6 +546,44 @@
                 transform: translateX(5px);
             }
         }
+
+        /* ===============================
+   MODO CELULAR REAL (RESPONSIVO)
+   =============================== */
+        @media (max-width: 768px) {
+
+            body {
+                background: var(--cor-bg-body);
+                align-items: stretch;
+                justify-content: stretch;
+                overflow: hidden;
+            }
+
+            /* Remove o mockup */
+            .mobile-mockup {
+                width: 100vw;
+                height: 100vh;
+                border-radius: 0;
+                box-shadow: none;
+                background: transparent;
+            }
+
+            /* Remove status bar fake */
+            .status-bar-mockup {
+                display: none;
+            }
+
+            /* App ocupa a tela toda */
+            .app-screen-content {
+                height: 100vh;
+                overflow: hidden;
+            }
+
+            .work-card {
+                height: 100vh;
+                border-radius: 0;
+            }
+        }
     </style>
 </head>
 
