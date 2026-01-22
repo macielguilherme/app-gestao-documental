@@ -589,7 +589,8 @@
 
 <body>
 
-    <input type="text" id="scannerTrap" class="scanner-trap" autocomplete="off">
+    <input type="text" id="scannerTrap" class="scanner-trap" autocomplete="off" inputmode="none">
+
 
     <div class="mobile-mockup">
 
@@ -812,6 +813,18 @@
         let timerInterval = null;
         let passoAtual = 1;
         let currentUser = null;
+        let modoDigitacaoAtivo = false;
+
+        function isMobile() {
+            return window.matchMedia("(max-width: 768px)").matches;
+        }
+
+        function focarScanner() {
+            if (!modoDigitacaoAtivo && !isMobile()) {
+                scannerTrap.focus();
+            }
+        }
+
 
         const MOCK_DB = [
             { id: "1234", nome: "LUCAS SANTOS" },
@@ -827,9 +840,8 @@
         // Inicialização
         window.onload = () => {
             setInterval(updateClockMockup, 1000);
-            scannerTrap.focus();
-            document.addEventListener('click', () => scannerTrap.focus());
         };
+
 
         function updateClockMockup() {
             const now = new Date();
@@ -877,12 +889,12 @@
             startTime = new Date();
             iniciarTimerVisual();
 
-            scannerTrap.focus();
+            focarScanner();
         }
 
         function cancelarLogin() {
             document.getElementById('modal-confirmacao').style.display = 'none';
-            scannerTrap.focus();
+            focarScanner();
         }
 
         // --- LÓGICA OPERACIONAL ---
@@ -1022,7 +1034,7 @@
         function removerItem(index) {
             listaItens.splice(index, 1);
             renderizarLista(); // Atualiza lista sem som
-            scannerTrap.focus();
+            focarScanner();
         }
 
 
@@ -1038,7 +1050,7 @@
             document.getElementById('inputStatus').value = '';
             document.getElementById('inputCaixa').value = '';
 
-            scannerTrap.focus();
+            focarScanner();
         }
 
 
@@ -1089,7 +1101,7 @@
             if (mode === 'digitar') {
                 ativarInputManual(btn);
             } else {
-                scannerTrap.focus();
+                focarScanner();
             }
         }
 
@@ -1101,28 +1113,43 @@
             if (mode === 'digitar') {
                 ativarInputManual(btn);
             } else {
-                scannerTrap.focus();
+                focarScanner();
             }
         }
 
 
 
         function ativarInputManual(btn) {
-            document.querySelectorAll('.btn-action-mode').forEach(b => b.classList.remove('active'));
+            modoDigitacaoAtivo = true;
+
+            document.querySelectorAll('.btn-action-mode')
+                .forEach(b => b.classList.remove('active'));
+
             if (btn) btn.classList.add('active');
+
             bottomSheet.style.display = 'flex';
             bsInput.value = '';
-            setTimeout(() => bsInput.focus(), 100);
+
+            setTimeout(() => bsInput.focus(), 150);
         }
+
 
         function confirmarPopup() {
             const val = bsInput.value.trim().toUpperCase();
             if (!val) return;
+
             bottomSheet.style.display = 'none';
-            if (document.getElementById('tela-login').offsetParent) tryLogin(val);
-            else processScan(val);
-            scannerTrap.focus();
+            modoDigitacaoAtivo = false;
+
+            if (document.getElementById('tela-login').offsetParent) {
+                tryLogin(val);
+            } else {
+                processScan(val);
+            }
+
+            focarScanner();
         }
+
 
 
         bsInput.addEventListener('keypress', (e) => {
@@ -1132,9 +1159,11 @@
         bottomSheet.addEventListener('click', (e) => {
             if (e.target === bottomSheet) {
                 bottomSheet.style.display = 'none';
-                scannerTrap.focus();
+                modoDigitacaoAtivo = false;
+                focarScanner();
             }
         });
+
 
     </script>
 
